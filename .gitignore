@@ -1,0 +1,7 @@
+#ignore system/packages files
+.DS_store 
+python3.11
+
+#Caches
+__pychache__
+.ipynb_checkpoints

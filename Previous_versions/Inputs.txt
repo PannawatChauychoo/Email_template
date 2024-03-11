@@ -1,0 +1,9 @@
+#About you: name, position, my_interest, PDP
+#About them: target_name, target_firm, target_common_interest, follow_up_count
+#available time: time1, time2, time3
+
+Pannawat, Data scientist, data science, Applied Data Science
+John, BCG, chess, 0
+March 5th 2pm, March 7th 11am, March 3rd 8am
+
+
