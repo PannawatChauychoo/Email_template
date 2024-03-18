@@ -49,7 +49,7 @@ def create_htmldraft(body_message, recipient):
          .execute()
       )
 
-      print(f'Draft id: {draft["id"]}\nDraft message: {draft["message"]}')
+      print(f"Draft id: {draft['id']}")
 
    except HttpError as error:
       print(f"An error occurred: {error}")
