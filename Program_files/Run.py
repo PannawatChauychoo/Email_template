@@ -54,13 +54,10 @@ def main():
     time_now = dt.datetime.now()
     time_now_formatted = convert_dt(time_now)
     
-    next_reach_out = ideal_time + dt.timedelta(days = 5)
+    next_reach_out = ideal_time + dt.timedelta(days = 7)
     next_reach_out_formatted = convert_dt(next_reach_out)
     
-    #Opening the excel file 
-    # 
-    # wb = load_workbook(data_path)
-    # target_sheet = wb.active
+    send_now = input("Do you want to send everything now? (Yes/No): ")
     
     #Create a draft for every email
     for i in range(0, len(target)):
@@ -82,18 +79,42 @@ def main():
                     draft_id = draft["id"]
                     print(f'Draft for {target_email} created with id: {draft_id}')
                     
-                    #Update excel files with the new follow_up_count and sent out time
-                    record_followup_time(indexed_row, follow_up_count, draft_id, ideal_time_formatted, time_now_formatted, next_reach_out_formatted)
-                    #Update follow_up_count, update status of email & input draft_id 
-                    update_status(indexed_row, time_now, ideal_time)
-                    
+                    if send_now == 'Yes':
+                        new_reach_out = time_now + dt.timedelta(days = 7)
+                        new_reach_out_formatted = convert_dt(new_reach_out)
+                        #Update excel files with the new follow_up_count and sent out time
+                        record_followup_time(indexed_row, follow_up_count, draft_id, time_now_formatted, time_now_formatted, new_reach_out_formatted)
+                        #Update follow_up_count, update status of email & input draft_id 
+                        update_status(indexed_row, time_now, time_now)
+                        sent_email = gmail_send_draft(draft_id = draft_id, recipient = target_email)
+                        print(f"Row {indexed_row}: Email for {target_email} has been sent!")
+                        
+                        wb = load_workbook(data_path)
+                        target_sheet = wb['Targets']
+                        #Update status
+                        status_cell = 'O' + indexed_row
+                        target_sheet[status_cell].value = "Sent"
+                        
+                        #Adding message ID and thread ID for future reference
+                        message_ID_cell = 'Q' + indexed_row
+                        target_sheet[message_ID_cell].value = sent_email["id"]
+                        thread_ID_cell = 'R' + indexed_row
+                        target_sheet[thread_ID_cell].value = sent_email["threadId"]
+                        wb.save(data_path)
+                        
+                    else:
+                        #Update excel files with the new follow_up_count and sent out time
+                        record_followup_time(indexed_row, follow_up_count, draft_id, ideal_time_formatted, time_now_formatted, next_reach_out_formatted)
+                        #Update follow_up_count, update status of email & input draft_id 
+                        update_status(indexed_row, time_now, ideal_time)
+
                 except Exception as error:
                     print(error)
 
             elif follow_up_count < 3:   #Second & third follow up
                 try:
                     wb = load_workbook(data_path)
-                    target_sheet = wb.active
+                    target_sheet = wb['Targets']
                     scheduled_time_cell = 'N' + indexed_row
                     scheduled_time = convert_str(target_sheet[scheduled_time_cell].value)
                     update_status(indexed_row, time_now, scheduled_time)
@@ -104,10 +125,10 @@ def main():
                     elif status_check == 'Sending':    #Sending emails
                         draft_id = target.iloc[i, 12]
                         send_time = convert_str(target.iloc[i, 13])
-                        sent_email = gmail_send_draft(draft_id = draft_id, recipients = target_email)
+                        sent_email = gmail_send_draft(draft_id = draft_id, recipient = target_email)
                         
                         wb = load_workbook(data_path)
-                        target_sheet = wb.active
+                        target_sheet = wb['Targets']
                         #Update status
                         status_cell = 'O' + indexed_row
                         target_sheet[status_cell].value = "Sent"
@@ -126,7 +147,7 @@ def main():
                         sent_code = check_if_sent(message_id=message_ID) 
                         
                         wb = load_workbook(data_path)
-                        target_sheet = wb.active
+                        target_sheet = wb['Targets']
                         if sent_code == 1:
                             print(f"Row {indexed_row}: Email has been sent!")
                             status_cell = 'O' + indexed_row
