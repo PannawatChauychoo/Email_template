@@ -36,6 +36,7 @@ def main():
     target = pd.read_excel('../Data/Contact_tracking.xlsx', sheet_name= "Targets")
     my_info = pd.read_excel('../Data/Contact_tracking.xlsx', sheet_name= "Myself")
     
+    resume_path = 'Pannawat_Resume_2024.pdf'
     
     #Combining my info with availabilities into a string
     my_email = my_info.iloc[0, 0]
@@ -75,7 +76,7 @@ def main():
                 try:
                     #generate template
                     email_draft_template = write_email(target_input_strings[i], my_formatted_info[0])
-                    draft = create_htmldraft(email_draft_template, target_email)
+                    draft = create_htmldraft(email_draft_template, target_email, resume_path)
                     draft_id = draft["id"]
                     print(f'Draft for {target_email} created with id: {draft_id}')
                     
@@ -163,7 +164,7 @@ def main():
                             pass
                         elif time_now >= Next_follow_up_date:
                             email_draft_template = write_email(target_input_strings[i], my_formatted_info[0])
-                            draft = create_htmldraft(email_draft_template, email)
+                            draft = create_htmldraft(email_draft_template, target_email, resume_path)
                             draft_id = draft["id"]
                             print(f"Row {indexed_row}: Draft for {target_email} created with id: {draft_id}")
                             record_followup_time(indexed_row, follow_up_count, draft_id, ideal_time_formatted, time_now_formatted, next_reach_out_formatted)
